@@ -1,0 +1,24 @@
+Model,Brand,Engine,Mileage,Speciality,Price (INR),Discount,Headquarter,IsAvailable
+Civic,Honda,I4,16,Sunroof,2100000,0.09,Greater Noida,Yes
+Corolla,Toyota,I4,18,Hybrid,2200000,0.05,Bangalore,Yes
+City,Honda,I4,17,Turbo,1150000,0.08,Greater Noida,Yes
+Swift,Maruti,I4,22,Best Seller,800000,0.04,New Delhi,Yes
+Creta,Hyundai,I4,16,SUV,1200000,0.06,Gurgaon,Yes
+Thar,Mahindra,I4,15,Offroad,1500000,0.07,Mumbai,Yes
+Fortuner,Toyota,V6,14,Premium SUV,3500000,0.10,Bangalore,Yes
+Harrier,Tata,I4,15,Panoramic Roof,1650000,0.09,Mumbai,Yes
+Model 3,Tesla,Electric,500,Autopilot,5000000,0.12,Bangalore,No
+Amaze,Honda,I4,18,Spacious,900000,0.06,Greater Noida,Yes
+Baleno,Maruti,I4,21,Premium Hatchback,800000,0.05,New Delhi,Yes
+Grand i10,Hyundai,I4,20,Compact,700000,0.05,Gurgaon,Yes
+Altroz,Tata,I4,19,Safe Hatchback,700000,0.07,Mumbai,Yes
+Wagon R,Maruti,I3,21,Family Car,600000,0.04,New Delhi,Yes
+Verna,Hyundai,I4,17,Stylish Sedan,1100000,0.08,Gurgaon,Yes
+Dzire,Maruti,I4,23,High Mileage,850000,0.08,New Delhi,Yes
+Venue,Hyundai,I4,18,Urban SUV,1000000,0.06,Gurgaon,Yes
+Seltos,Kia,I4,16,Feature Rich,1500000,0.09,Gurgaon,Yes
+Innova,Toyota,I4,13,MPV,1800000,0.06,Bangalore,Yes
+Brezza,Maruti,I4,17,Compact SUV,900000,0.05,New Delhi,Yes
+Magnite,Nissan,I4,18,Affordable SUV,800000,0.07,Chennai,Yes
+Tiago,Tata,I3,20,Economical,600000,0.06,Mumbai,Yes
+Alto,Maruti,I3,24,India’s Favorite,450000,0.03,New Delhi,Yes

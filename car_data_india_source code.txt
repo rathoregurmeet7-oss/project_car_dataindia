@@ -1,0 +1,162 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import requests
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# --------------------------
+# Load dataset
+# --------------------------
+df = pd.read_csv("travel_dataset.csv")  # make sure your CSV has columns: City, Country, Description, Avg_Cost, Best_Time_to_Travel
+
+# --------------------------
+# TF-IDF embeddings
+# --------------------------
+vectorizer = TfidfVectorizer(stop_words='english')
+destination_embeddings = vectorizer.fit_transform(df['Description'])
+
+def get_user_embedding(text):
+    return vectorizer.transform([text])
+
+# --------------------------
+# Cost estimator
+# --------------------------
+def estimate_travel_cost(base_cost, user_country, dest_country):
+    if user_country.lower() == dest_country.lower():
+        multiplier = 1
+        category = "Local travel"
+    elif user_country.lower() in ["india", "nepal", "sri lanka", "bangladesh"] and dest_country.lower() in ["india", "nepal", "sri lanka", "bangladesh"]:
+        multiplier = 1.5
+        category = "Regional travel"
+    else:
+        multiplier = 3
+        category = "International travel"
+    return base_cost * multiplier, category
+
+# --------------------------
+# Currency converter
+# --------------------------
+@st.cache_data
+def get_usd_to_inr():
+    try:
+        response = requests.get("https://api.exchangerate-api.com/v4/latest/USD")
+        return response.json()["rates"]["INR"]
+    except:
+        return 84.0
+
+usd_to_inr = get_usd_to_inr()
+
+# --------------------------
+# Page Styling + Animations
+# --------------------------
+st.markdown(
+    """
+    <style>
+    /* Full page background */
+    .stApp {
+        background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: white;
+    }
+
+    /* Overlay for main content */
+    .overlay {
+        background: rgba(0, 0, 0, 0.35);
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    /* Text shadow for readability */
+    h1, h2, h3, p {
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+    }
+
+    /* Recommendation cards */
+    .card {
+        background: rgba(255, 255, 255, 0.85);
+        padding: 15px;
+        border-radius: 12px;
+        margin: 10px 0;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        color: #000;
+    }
+
+    /* Single moving cloud */
+    .cloud {
+        position: fixed;
+        top: 5%;  /* cloud at the top */
+        width: 200px;
+        opacity: 0.6;
+        z-index: 998;
+        animation: cloudMove 40s linear infinite;
+    }
+
+    @keyframes cloudMove {
+        0% { left: -250px; }
+        100% { left: 110%; }
+    }
+    </style>
+
+    <!-- Single top cloud -->
+    <img src='https://cdn-icons-png.flaticon.com/512/414/414825.png' class='cloud'>
+    """, unsafe_allow_html=True
+)
+
+
+
+# --------------------------
+# Main UI
+# --------------------------
+st.markdown("<div class='overlay'>", unsafe_allow_html=True)
+
+st.title("🧭 Smart Travel Destination Recommender 🌍")
+st.write("Get personalized travel suggestions using AI")
+
+user_country = st.text_input("Enter your current country:", "India")
+user_interest = st.text_input(
+    "Describe your travel interest (e.g., beaches, adventure, temples, nature):", "adventure"
+)
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# --------------------------
+# Recommendations
+# --------------------------
+if st.button("🔍 Show Recommendations"):
+    with st.spinner("Calculating recommendations..."):
+        user_embedding = get_user_embedding(user_interest)
+        similarities = cosine_similarity(user_embedding, destination_embeddings)[0]
+        df['Similarity'] = similarities
+
+        # Sort local & global
+        df_sorted = df.sort_values(by='Similarity', ascending=False)
+        local_results = df_sorted[df_sorted['Country'].str.lower() == user_country.lower()]
+        global_results = df_sorted[df_sorted['Country'].str.lower() != user_country.lower()]
+        top_results = pd.concat([local_results, global_results]).head(10)
+
+        # Display cards
+        for i, row in top_results.iterrows():
+            dest_country = row['Country']
+            base_cost = row['Avg_Cost']
+            estimated_cost, travel_type = estimate_travel_cost(base_cost, user_country, dest_country)
+
+            st.markdown(
+                f"<div class='card'>"
+                f"<h3>🏙️ {row['City']} ({dest_country})</h3>"
+                f"<p>🕒 <strong>Best Time:</strong> {row['Best_Time_to_Travel']}</p>"
+                f"<p>📖 <strong>Why Visit:</strong> {row['Description']}</p>"
+                f"<p>🌎 <strong>Travel Type:</strong> {travel_type}</p>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+
+            if user_country.lower() == "india":
+                estimated_cost_inr = estimated_cost * usd_to_inr
+                st.write(f"💰 Estimated Cost: ₹{estimated_cost_inr:,.2f} INR")
+            else:
+                st.write(f"💰 Estimated Cost: ${estimated_cost:.2f} USD")
+
+        st.success("✈️ Explore Destinations with AI-Powered Travel Advisor 🌍")
